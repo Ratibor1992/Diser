@@ -16,3 +16,6 @@ C:\Users\RATIBOR\Desktop\syntacsys_analizer\AnalizerVEr2\SyntacAnalzer\WindowsFo
 C:\Users\RATIBOR\Desktop\syntacsys_analizer\AnalizerVEr2\SyntacAnalzer\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
 C:\Users\RATIBOR\Desktop\syntacsys_analizer\AnalizerVEr2\SyntacAnalzer\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
 C:\Users\RATIBOR\Desktop\syntacsys_analizer\AnalizerVEr2\SyntacAnalzer\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\RATIBOR\Desktop\ANALIZER\new\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\Users\RATIBOR\Desktop\ANALIZER\new\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\Users\RATIBOR\Desktop\ANALIZER\new\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
