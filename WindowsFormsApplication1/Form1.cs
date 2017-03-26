@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 using System.IO;
 
 
@@ -15,11 +16,12 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         public string ReportPath;
-        
+        public string []filesEnum;
 
         public Form1()
         {
             InitializeComponent();
+            textBox2.Text = ReportPath = @"D:\";
         }
 
 
@@ -34,26 +36,10 @@ namespace WindowsFormsApplication1
         private void button2_Click(object sender, EventArgs e)
         {
             //// add find map. file 
-            Parser.GetFolderFileName(folderBrowserDialog1.SelectedPath, ReportPath);    
+            Parser.GetFolderFileName(folderBrowserDialog1.SelectedPath, ReportPath);
+            Parser.GetFunctionList(folderBrowserDialog1.SelectedPath, ReportPath, Parser.FileInProject);
             label3.Text = "Result: OK";
-            /*       var allFiles = Directory.GetFiles(folderBrowserDialog1.SelectedPath, "*.map", SearchOption.AllDirectories);
-                   MapFilepath = allFiles[0];
-                   //// parser
-                   lines = System.IO.File.ReadAllLines(MapFilepath);
-                   FileStream file1 = new FileStream(ReportPath, FileMode.Create);
-                   StreamWriter writer = new StreamWriter(file1);
-                   //File.Create(ReportPath);
-                   ///new commit
-                   ///
-                   foreach (string line in lines)
-                   {
-                       if ((line.Contains("Thumb Code")) && (line.Contains("(i.")))
-                       {
-                           writer.Write(line);
-                           writer.Write("\r\n");
-                       }
-                   }
-                   writer.Close();*/
+
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -63,7 +49,7 @@ namespace WindowsFormsApplication1
             saveFileDialog1.Title = "Save an Text File";
             saveFileDialog1.ShowDialog();
            
-            textBox2.Text = ReportPath = saveFileDialog1.FileName; ;
+            textBox2.Text = ReportPath = saveFileDialog1.FileName;
         }
     }
 }
@@ -77,7 +63,7 @@ class Parser
     public const string Objects = "Objects";
     public const string Listings = "Listings";
     public const string RTE = "RTE";
-    public string[] FileInProject;
+    public static List<string> FileInProject = new List<string>();
 
 
     public static void GetFolderFileName(string Project, string Report)
@@ -107,16 +93,56 @@ class Parser
                 string[] dirs = Directory.GetFiles(line, "*.c");
                 foreach (string dir in dirs)
                 {
-                    string Tmp;
+                    string Tmp, lower;
+                    
                     Tmp = dir.Replace(line, "");
                     Tmp = Tmp.Replace(@"\","");
                     writer.Write("\t");
-                    writer.Write(Tmp);
+                    writer.Write(Tmp);//
+                    lower = Tmp.Remove(Tmp.Length - 2);
+                    FileInProject.Add(lower.ToLower());
                     writer.Write("\r\n");
                 }
                 writer.Write("\r\n");
             }
         }
+        writer.Write("***************************Function List*********************************");
         writer.Close();
+    }
+    public static void GetFunctionList(string Project, string ReportPath, List<string> FilesList)
+    {
+        string MapFilePath;
+        string[] lines;
+        FileStream textReport = new FileStream(ReportPath, FileMode.Append);
+        StreamWriter report = new StreamWriter(textReport);
+
+       var allFiles = Directory.GetFiles(Project, "*.map", SearchOption.AllDirectories);
+       MapFilePath = allFiles[0];
+
+       lines = System.IO.File.ReadAllLines(MapFilePath);
+       report.Write("\r\n");
+       foreach (string line in lines)
+       {
+           if (line.Contains("Thumb Code")) //&& (line.Contains("(i.")))
+           {
+                string temp;
+               
+                foreach(string filesname in FilesList)
+                {
+                   // ads1118.o(i.
+                    temp = "\\b" + filesname + ".o"+"\\b";
+                    // temp = "(i." + filesname;
+                    if (Regex.IsMatch(line, temp, RegexOptions.IgnoreCase))
+                    {
+                        string firstWord = line.Trim();
+                       // firstWord.Substring(0, firstWord.IndexOf(" "));
+                        report.Write(firstWord.Substring(0, firstWord.IndexOf(" ")));
+                        report.Write("\r\n");
+                    }
+                }       
+           }
+       }
+       report.Close();
+
     }
 }
