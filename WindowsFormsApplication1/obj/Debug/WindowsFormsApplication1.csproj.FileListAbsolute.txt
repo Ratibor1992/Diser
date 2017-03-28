@@ -28,3 +28,12 @@ C:\Users\RATIBOR\Desktop\Новая папка\new\WindowsFormsApplication1\obj\
 C:\Users\RATIBOR\Desktop\Новая папка\new\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
 C:\Users\RATIBOR\Desktop\Новая папка\new\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
 C:\Users\RATIBOR\Desktop\Новая папка\new\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
