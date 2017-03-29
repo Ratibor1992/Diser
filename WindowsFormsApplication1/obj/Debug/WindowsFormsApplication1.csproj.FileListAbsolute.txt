@@ -55,3 +55,17 @@ C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\MasterDiploma\Windo
 C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\MasterDiploma\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.MainWindowForm.resources
 C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\MasterDiploma\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
 C:\Users\RATIBOR\Desktop\Новая папка\MasterDiploma\MasterDiploma\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+D:\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+D:\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+D:\Diser\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+D:\Diser\WindowsFormsApplication1\bin\Debug\SharpSvn.dll
+D:\Diser\WindowsFormsApplication1\bin\Debug\SharpSvn.UI.dll
+D:\Diser\WindowsFormsApplication1\bin\Debug\SharpSvn.xml
+D:\Diser\WindowsFormsApplication1\bin\Debug\SharpSvn.UI.xml
+D:\Diser\WindowsFormsApplication1\bin\Debug\SharpPlink-Win32.svnExe
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.MainWindowForm.resources
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+D:\Diser\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
