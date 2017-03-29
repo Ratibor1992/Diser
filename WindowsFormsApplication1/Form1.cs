@@ -9,19 +9,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
-
+using SharpSvn;
 
 namespace WindowsFormsApplication1
 {
-    public partial class Form1 : Form
+    public partial class MainWindowForm : Form
     {
         public string ReportPath;
         public string []filesEnum;
+        private Project projectObj;
 
-        public Form1()
+        public MainWindowForm()
         {
             InitializeComponent();
-            textBox2.Text = ReportPath = @"D:\";
+            ReportFilePathTb.Text = ReportPath = @"D:\";
+            projectObj = new Project(ReportPath);
         }
 
 
@@ -29,16 +31,19 @@ namespace WindowsFormsApplication1
         {
             if (this.folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
+                projectObj.Path = ProjectPathTb.Text = folderBrowserDialog1.SelectedPath;
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             //// add find map. file 
-            Parser.GetFolderFileName(folderBrowserDialog1.SelectedPath, ReportPath);
-            Parser.GetFunctionList(folderBrowserDialog1.SelectedPath, ReportPath, Parser.FileInProject);
-            label3.Text = "Result: OK";
+            //      Parser.GetFolderFileName(folderBrowserDialog1.SelectedPath, ReportPath);
+            //      Parser.GetFunctionList(folderBrowserDialog1.SelectedPath, ReportPath, Parser.FileInProject);
+            projectObj.ParseProject();
+            projectObj.GenerateReport(ReportPath);
+            
+            AnalysisResultLbl.Text = "Result: OK";
 
         }
 
@@ -49,7 +54,7 @@ namespace WindowsFormsApplication1
             saveFileDialog1.Title = "Save an Text File";
             saveFileDialog1.ShowDialog();
            
-            textBox2.Text = ReportPath = saveFileDialog1.FileName;
+            ReportFilePathTb.Text = ReportPath = saveFileDialog1.FileName;
         }
     }
 }
