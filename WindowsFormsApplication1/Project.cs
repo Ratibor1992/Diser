@@ -98,9 +98,29 @@ namespace WindowsFormsApplication1
                         // temp = "(i." + filesname;
                         if (Regex.IsMatch(line, temp, RegexOptions.IgnoreCase))
                         {
-                            string firstWord = line.Trim();
-                            firstWord.Substring(0, firstWord.IndexOf(" "));
-                            Functions.Add(new Function(firstWord.Substring(0, firstWord.IndexOf(" "))));
+                            string FunctionFilePath = Directory.GetFiles(Path, filesname, SearchOption.AllDirectories).First();
+
+                            using (StreamReader sr = new StreamReader(FunctionFilePath))
+                            {
+                                string firstWord = line.Trim();
+                                firstWord.Substring(0, firstWord.IndexOf(" "));
+                                string functionName = firstWord.Substring(0, firstWord.IndexOf(" "));
+
+                                string fileContents = sr.ReadToEnd();
+
+                                Regex rx = new Regex(String.Format("[a-zA-Z0-9]+ {0}\\s*[(]", functionName));
+
+                                Match match = rx.Match(fileContents);
+                                int functionIndex = match.Index;
+                                fileContents = fileContents.Substring(functionIndex);
+                                functionIndex = fileContents.IndexOf('{');
+                                fileContents = fileContents.Substring(0, functionIndex);
+                                functionIndex = fileContents.LastIndexOf(')');
+                                // Getting function initialization with format : *return type* *function name* (*parameters*) 
+                                string functionInitialization = fileContents.Substring(0, functionIndex);
+                                // TODO: parse initializer for return type and parameters
+                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, "")));
+                            }
                         }
                     }
                 }

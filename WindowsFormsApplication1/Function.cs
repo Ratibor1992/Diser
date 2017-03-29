@@ -21,19 +21,21 @@ namespace WindowsFormsApplication1
             Parameters = new List<FuncParameter>();
         }
 
-        public Function(string name, List<FuncParameter> parameters, string sourcePath )
+        public Function(string name, string sourcePath)
         {
             Name = name;
-            Parameters = parameters;
             SourcePath = sourcePath;
             IsTested = false;
         }
 
         public string Name { get; set; }
         public List<FuncParameter> Parameters { get; set; }
+        public string ReturnValue { get; set; }
         public bool IsTested { get; set; }
         public string SourcePath { get; set; }
 
+
+        
     }
 
     [Serializable]

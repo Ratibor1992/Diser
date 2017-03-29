@@ -42,7 +42,7 @@ namespace WindowsFormsApplication1
                 AnalysisResultLbl.Text = "Project not selected";
             }
             
-            else if (!ReportFilePathTb.Text.Contains("*.txt"))
+            else if (!ReportFilePathTb.Text.Contains(".txt"))
             {
                 AnalysisResultLbl.Text = "Report Path not selected!";
             }
