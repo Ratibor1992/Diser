@@ -55,14 +55,14 @@ namespace WindowsFormsApplication1
                 else
                 {
                     string Tmp1;
-
+                 
                     Tmp1 = line.Replace(Path, "");
                     Tmp1 = Tmp1.Replace(@"\", "");
 
-                    string[] dirs = Directory.GetFiles(line, "*.c");
+                    string[] dirs = Directory.GetFiles(line, "*.c");    
                     foreach (string dir in dirs)
                     {
-                        string Tmp, lower;
+                        string Tmp;
 
                         Tmp = dir.Replace(line, "");
                         Tmp = Tmp.Replace(@"\", "");

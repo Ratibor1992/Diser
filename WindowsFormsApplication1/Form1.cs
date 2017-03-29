@@ -37,13 +37,21 @@ namespace WindowsFormsApplication1
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //// add find map. file 
-            //      Parser.GetFolderFileName(folderBrowserDialog1.SelectedPath, ReportPath);
-            //      Parser.GetFunctionList(folderBrowserDialog1.SelectedPath, ReportPath, Parser.FileInProject);
-            projectObj.ParseProject();
-            projectObj.GenerateReport(ReportPath);            
-            AnalysisResultLbl.Text = "Result: OK";
-
+            if (String.IsNullOrEmpty(ProjectPathTb.Text))
+            {
+                AnalysisResultLbl.Text = "Project not selected";
+            }
+            
+            else if (!ReportFilePathTb.Text.Contains("*.txt"))
+            {
+                AnalysisResultLbl.Text = "Report Path not selected!";
+            }
+            else
+            {
+                projectObj.ParseProject();
+                projectObj.GenerateReport(ReportPath);
+                AnalysisResultLbl.Text = "Result: OK";
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
