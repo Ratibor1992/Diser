@@ -118,8 +118,32 @@ namespace WindowsFormsApplication1
                                 functionIndex = fileContents.LastIndexOf(')');
                                 // Getting function initialization with format : *return type* *function name* (*parameters*) 
                                 string functionInitialization = fileContents.Substring(0, functionIndex);
-                                // TODO: parse initializer for return type and parameters
-                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, "")));
+                                functionIndex = functionInitialization.IndexOf(" ");
+
+                                string functioReturnType = functionInitialization.Substring(0, functionIndex);
+                                functionInitialization = functionInitialization.Substring(functionIndex);
+
+                                functionIndex = functionInitialization.IndexOf("(");
+                                functionInitialization = functionInitialization.Substring(functionIndex + 1);
+
+                                string[] parameters = functionInitialization.Split(',');
+                                List<FuncParameter> funcParameters = new List<FuncParameter>();
+                                foreach (string parameterPair in parameters)
+                                {
+                                    string[] parametersTokens = parameterPair.Split(' ');
+                                    if (parametersTokens.Length == 1)
+                                        funcParameters.Add(new FuncParameter() { Name = "", Type = "void" });
+                                    else
+                                    {
+                                        string parameterType = parametersTokens[0];
+                                        for (var i = 1; i < parametersTokens.Length - 1; i++)
+                                        {
+                                            parameterType += " " + parametersTokens[i];
+                                        }
+                                        funcParameters.Add(new FuncParameter() { Name = parametersTokens[parametersTokens.Length - 1], Type = parameterType });
+                                    }
+                                }
+                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, ""), funcParameters));
                             }
                         }
                     }
@@ -152,8 +176,11 @@ namespace WindowsFormsApplication1
             writer.Write("***************************Functions List*********************************");
             foreach (var func in Functions)
             {
-                writer.Write("\r\n");
-                writer.Write(func.Name);
+                writer.Write(String.Format("\r\n Name: {0} \r\n Parameters:", func.Name));
+                foreach (var param in func.Parameters)
+                {
+                    writer.Write(String.Format("\r\n{0} {1}", param.Type, param.Name));
+                }
             }
             writer.Write("\r\n");
             writer.Close();
