@@ -186,6 +186,63 @@ namespace WindowsFormsApplication1
             writer.Close();
         }
 
+
+        public void CopyFunctionsToSeparetedFiles (string ReportFolder)
+        {
+            /// 1. create separeted folder
+            /// 2. create file .c file with name of function
+            /// 3. copy function to file
+            /// 4. close file
+            string FunctionReportPath;
+            string NewFileName;
+            byte OpenBrace = 0;
+            byte CloseBrace = 0;
+            bool startFunction = false;
+            string[] lines;
+           
+
+            FunctionReportPath = string.Concat(ReportFolder, "\\Functions");
+            Directory.CreateDirectory(FunctionReportPath);
+
+
+            foreach (var func in Functions)
+            {
+                // 1. create file "function Name.c"
+                 List<string> FunctionLines = new List<string>(); 
+                NewFileName = string.Concat(string.Concat(string.Concat(FunctionReportPath, "\\"), func.Name), ".c");
+                //
+                ////FileStream NewFile = new FileStream(NewFileName, FileMode.Create);
+                ////StreamWriter writer = new StreamWriter(NewFile);
+                // func.SourcePath
+
+                lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
+                foreach (string line in lines)
+                {
+                    if ((line.Contains(func.ReturnValue + func.Name)) || (startFunction == true))
+                    {
+                        ////add cycle for copying function
+                        if (line.Contains("{"))
+                            OpenBrace++;
+                        if (line.Contains("}"))
+                            CloseBrace++;
+                        if ((OpenBrace > 0) && (CloseBrace > 0) && (OpenBrace == CloseBrace))
+                        {
+                            FunctionLines.Add(line);
+                            startFunction = false;
+                            break;
+                        }
+                        else
+                        {
+                            FunctionLines.Add(line);
+                            startFunction = true;
+                        }
+                    }
+                }
+                System.IO.File.WriteAllLines(NewFileName, FunctionLines);
+            }
+
+        }
+
     }
 
     static class ProjectXMLSerializer

@@ -16,13 +16,15 @@ namespace WindowsFormsApplication1
     public partial class MainWindowForm : Form
     {
         public string ReportPath;
+        public string ReportFolderPath;
         public string []filesEnum;
         private Project projectObj;
 
         public MainWindowForm()
         {
             InitializeComponent();
-            ReportFilePathTb.Text = ReportPath = @"D:\";
+            ReportFolder.Text = ReportFilePathTb.Text = ReportPath = @"D:\";
+            ReportFolderPathDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             projectObj = new Project(ReportPath);
         }
 
@@ -50,6 +52,7 @@ namespace WindowsFormsApplication1
             {
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
+                projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
                 AnalysisResultLbl.Text = "Result: OK";
             }
         }
@@ -62,6 +65,14 @@ namespace WindowsFormsApplication1
             saveFileDialog1.ShowDialog();
            
             ReportFilePathTb.Text = ReportPath = saveFileDialog1.FileName;
+        }
+
+        private void ReportFolderPathBtn_Click(object sender, EventArgs e)
+        {
+            if (this.ReportFolderPathDialog.ShowDialog() == DialogResult.OK)
+            {
+                ReportFolderPath = ReportFolder.Text = ReportFolderPathDialog.SelectedPath;
+            }
         }
     }
 }
