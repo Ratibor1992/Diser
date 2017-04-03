@@ -218,7 +218,7 @@ namespace WindowsFormsApplication1
                 lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
                 foreach (string line in lines)
                 {
-                    if ((line.Contains(func.ReturnValue + func.Name)) || (startFunction == true))
+                    if ((!line.Contains(":") && (line.Contains(func.Name))) || (startFunction == true))
                     {
                         ////add cycle for copying function
                         if (line.Contains("{"))
@@ -229,6 +229,7 @@ namespace WindowsFormsApplication1
                         {
                             FunctionLines.Add(line);
                             startFunction = false;
+                            OpenBrace = CloseBrace = 0;
                             break;
                         }
                         else
