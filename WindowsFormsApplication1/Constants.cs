@@ -13,5 +13,7 @@ namespace WindowsFormsApplication1
         public const string Objects = "Objects";
         public const string Listings = "Listings";
         public const string RTE = "RTE";
+        public const string FUNCTIONS_FOLDER = "\\Functions";
+        public const string GRAPHS_FOLDER = "\\Graphs";
     }
 }

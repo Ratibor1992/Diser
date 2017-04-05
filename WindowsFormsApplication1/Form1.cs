@@ -53,6 +53,7 @@ namespace WindowsFormsApplication1
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
                 projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
+                projectObj.CreateGraphsForEachFunctions(ReportFolderPath);
                 AnalysisResultLbl.Text = "Result: OK";
             }
         }

@@ -120,7 +120,7 @@ namespace WindowsFormsApplication1
                                 string functionInitialization = fileContents.Substring(0, functionIndex);
                                 functionIndex = functionInitialization.IndexOf(" ");
 
-                                string functioReturnType = functionInitialization.Substring(0, functionIndex);
+                                string functionReturnType = functionInitialization.Substring(0, functionIndex);
                                 functionInitialization = functionInitialization.Substring(functionIndex);
 
                                 functionIndex = functionInitialization.IndexOf("(");
@@ -143,7 +143,7 @@ namespace WindowsFormsApplication1
                                         funcParameters.Add(new FuncParameter() { Name = parametersTokens[parametersTokens.Length - 1], Type = parameterType });
                                     }
                                 }
-                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, ""), funcParameters));
+                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, ""), funcParameters, functionReturnType));
                             }
                         }
                     }
@@ -201,24 +201,19 @@ namespace WindowsFormsApplication1
             string[] lines;
            
 
-            FunctionReportPath = string.Concat(ReportFolder, "\\Functions");
+            FunctionReportPath = string.Concat(ReportFolder, Constants.FUNCTIONS_FOLDER);
             Directory.CreateDirectory(FunctionReportPath);
 
 
             foreach (var func in Functions)
             {
                 // 1. create file "function Name.c"
-                 List<string> FunctionLines = new List<string>(); 
+                List<string> FunctionLines = new List<string>(); 
                 NewFileName = string.Concat(string.Concat(string.Concat(FunctionReportPath, "\\"), func.Name), ".c");
-                //
-                ////FileStream NewFile = new FileStream(NewFileName, FileMode.Create);
-                ////StreamWriter writer = new StreamWriter(NewFile);
-                // func.SourcePath
-
                 lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
                 foreach (string line in lines)
                 {
-                    if ((!line.Contains(":") && (line.Contains(func.Name))) || (startFunction == true))
+                    if ((!line.Contains(":") && (line.Contains(func.Name)) && (line.Contains(func.ReturnValue))) || (startFunction == true))
                     {
                         ////add cycle for copying function
                         if (line.Contains("{"))
@@ -239,12 +234,25 @@ namespace WindowsFormsApplication1
                         }
                     }
                 }
+                // little loop for removing commntes inside lines
+                for (int i = 0; i < FunctionLines.Count; i++)
+                {
+                    int index = FunctionLines[i].IndexOf("//");
+                    if (index > 0)
+                        FunctionLines[i] = FunctionLines[i].Substring(0, index);
+                }
                 System.IO.File.WriteAllLines(NewFileName, FunctionLines);
             }
-
         }
 
+        public void CreateGraphsForEachFunctions(string ReportFolder)
+        {
+            string GraphsReportPath;
+            GraphsReportPath = string.Concat(ReportFolder, Constants.GRAPHS_FOLDER);
+            Directory.CreateDirectory(GraphsReportPath);
+        }
     }
+
 
     static class ProjectXMLSerializer
     {
