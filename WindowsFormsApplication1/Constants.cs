@@ -13,7 +13,10 @@ namespace WindowsFormsApplication1
         public const string Objects = "Objects";
         public const string Listings = "Listings";
         public const string RTE = "RTE";
-        public const string FUNCTIONS_FOLDER = "\\Functions";
-        public const string GRAPHS_FOLDER = "\\Graphs";
+        public const string REPORT_FOLDER = "\\Report";
+        public const string REPORT_NAME = "\\Report.txt";
+        public const string ANALISYS_RESULT_OK = "Result: OK";
+        public const string ANALISYS_RESULT_ERROR = "Project not selected";
+
     }
 }

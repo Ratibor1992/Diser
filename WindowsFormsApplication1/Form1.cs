@@ -23,8 +23,6 @@ namespace WindowsFormsApplication1
         public MainWindowForm()
         {
             InitializeComponent();
-            ReportFolder.Text = ReportFilePathTb.Text = ReportPath = @"D:\";
-            ReportFolderPathDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             projectObj = new Project(ReportPath);
         }
 
@@ -33,7 +31,11 @@ namespace WindowsFormsApplication1
         {
             if (this.folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                projectObj.Path = ProjectPathTb.Text = folderBrowserDialog1.SelectedPath;
+                ReportFolderPath = projectObj.Path = ProjectPathTb.Text = folderBrowserDialog1.SelectedPath;
+
+                ReportFolderPath = string.Concat(ReportFolderPath, Constants.REPORT_FOLDER);
+                Directory.CreateDirectory(ReportFolderPath);
+                ReportPath = string.Concat(ReportFolderPath, Constants.REPORT_NAME);
             }
         }
 
@@ -41,39 +43,23 @@ namespace WindowsFormsApplication1
         {
             if (String.IsNullOrEmpty(ProjectPathTb.Text))
             {
-                AnalysisResultLbl.Text = "Project not selected";
+                AnalysisResultLbl.Text = Constants.ANALISYS_RESULT_ERROR;
             }
             
-            else if (!ReportFilePathTb.Text.Contains(".txt"))
-            {
-                AnalysisResultLbl.Text = "Report Path not selected!";
-            }
             else
             {
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
-                projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
-                projectObj.CreateGraphsForEachFunctions(ReportFolderPath);
-                AnalysisResultLbl.Text = "Result: OK";
+                projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);              
+                AnalysisResultLbl.Text = Constants.ANALISYS_RESULT_OK;
+                OpenFunctionList.Visible = true;
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void OpenFunctionList_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
-            saveFileDialog1.Title = "Save an Text File";
-            saveFileDialog1.ShowDialog();
-           
-            ReportFilePathTb.Text = ReportPath = saveFileDialog1.FileName;
-        }
-
-        private void ReportFolderPathBtn_Click(object sender, EventArgs e)
-        {
-            if (this.ReportFolderPathDialog.ShowDialog() == DialogResult.OK)
-            {
-                ReportFolderPath = ReportFolder.Text = ReportFolderPathDialog.SelectedPath;
-            }
+            FormWithList frm = new FormWithList(projectObj);
+            frm.Show();
         }
     }
 }

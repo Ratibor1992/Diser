@@ -30,6 +30,7 @@ namespace WindowsFormsApplication1
             Path = path;
             FilesList = new List<string>();
             Functions = new List<Function>();
+
         }
 
         public void ParseProject()
@@ -93,9 +94,9 @@ namespace WindowsFormsApplication1
                     foreach (string filesname in FilesList)
                     {
                         shortFileName = filesname.Remove(filesname.Length - 2).ToLower();
-                        // ads1118.o(i.
+
                         temp = "\\b" + shortFileName + ".o" + "\\b";
-                        // temp = "(i." + filesname;
+
                         if (Regex.IsMatch(line, temp, RegexOptions.IgnoreCase))
                         {
                             string FunctionFilePath = Directory.GetFiles(Path, filesname, SearchOption.AllDirectories).First();
@@ -201,7 +202,7 @@ namespace WindowsFormsApplication1
             string[] lines;
            
 
-            FunctionReportPath = string.Concat(ReportFolder, Constants.FUNCTIONS_FOLDER);
+            FunctionReportPath = string.Concat(ReportFolder, "\\Functions");
             Directory.CreateDirectory(FunctionReportPath);
 
 
@@ -213,7 +214,7 @@ namespace WindowsFormsApplication1
                 lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
                 foreach (string line in lines)
                 {
-                    if ((!line.Contains(":") && (line.Contains(func.Name)) && (line.Contains(func.ReturnValue))) || (startFunction == true))
+                    if ((!line.Contains(":") && (line.Contains(func.Name))) || (startFunction == true))
                     {
                         ////add cycle for copying function
                         if (line.Contains("{"))
@@ -234,25 +235,12 @@ namespace WindowsFormsApplication1
                         }
                     }
                 }
-                // little loop for removing commntes inside lines
-                for (int i = 0; i < FunctionLines.Count; i++)
-                {
-                    int index = FunctionLines[i].IndexOf("//");
-                    if (index > 0)
-                        FunctionLines[i] = FunctionLines[i].Substring(0, index);
-                }
                 System.IO.File.WriteAllLines(NewFileName, FunctionLines);
             }
+
         }
 
-        public void CreateGraphsForEachFunctions(string ReportFolder)
-        {
-            string GraphsReportPath;
-            GraphsReportPath = string.Concat(ReportFolder, Constants.GRAPHS_FOLDER);
-            Directory.CreateDirectory(GraphsReportPath);
-        }
     }
-
 
     static class ProjectXMLSerializer
     {
