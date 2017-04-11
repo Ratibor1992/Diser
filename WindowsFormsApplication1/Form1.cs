@@ -50,7 +50,14 @@ namespace WindowsFormsApplication1
             {
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
-                projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);              
+                projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
+                foreach(var prj in projectObj.Functions)
+                {
+                    prj.NumberOfEdgesInGraph = projectObj.GetNumberOfEdgesFormFunction(prj.SeparetedFunctionPath, prj.Name);
+                    projectObj.AddInforInFuctionFiles(prj.SeparetedFunctionPath, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
+                    prj.matrix = new int[prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph];
+                   // projectObj.AddMatrixInFuctionFiles(prj.SeparetedFunctionPath, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
+                }    
                 AnalysisResultLbl.Text = Constants.ANALISYS_RESULT_OK;
                 OpenFunctionList.Visible = true;
             }

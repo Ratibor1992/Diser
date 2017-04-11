@@ -19,6 +19,7 @@ namespace WindowsFormsApplication1
         public List<string> FilesList { get; set; }
         public List<Function> Functions { get; set; }
 
+
         public Project()
         {
             FilesList = new List<string>();
@@ -56,11 +57,11 @@ namespace WindowsFormsApplication1
                 else
                 {
                     string Tmp1;
-                 
+
                     Tmp1 = line.Replace(Path, "");
                     Tmp1 = Tmp1.Replace(@"\", "");
 
-                    string[] dirs = Directory.GetFiles(line, "*.c");    
+                    string[] dirs = Directory.GetFiles(line, "*.c");
                     foreach (string dir in dirs)
                     {
                         string Tmp;
@@ -156,16 +157,16 @@ namespace WindowsFormsApplication1
             using (SvnClient client = new SvnClient())
             {
                 SvnInfoEventArgs info;
-                SVNVersion =  client.GetInfo(SvnPathTarget.FromString(Path), out info) ? info.Revision : 0;
+                SVNVersion = client.GetInfo(SvnPathTarget.FromString(Path), out info) ? info.Revision : 0;
             }
         }
-            
+
         public void GenerateReport(string ReportPath)
         {
             FileStream file1 = new FileStream(ReportPath, FileMode.Create);
             StreamWriter writer = new StreamWriter(file1);
 
-            writer.Write(String.Format("Project Path: {0}\r\nTortoiseSVN Version: {1}\r\n", Path,SVNVersion.ToString()));
+            writer.Write(String.Format("Project Path: {0}\r\nTortoiseSVN Version: {1}\r\n", Path, SVNVersion.ToString()));
 
             writer.Write("***************************User Files List*********************************");
             foreach (var file in FilesList)
@@ -188,7 +189,7 @@ namespace WindowsFormsApplication1
         }
 
 
-        public void CopyFunctionsToSeparetedFiles (string ReportFolder)
+        public void CopyFunctionsToSeparetedFiles(string ReportFolder)
         {
             /// 1. create separeted folder
             /// 2. create file .c file with name of function
@@ -200,46 +201,219 @@ namespace WindowsFormsApplication1
             byte CloseBrace = 0;
             bool startFunction = false;
             string[] lines;
-           
+
+
 
             FunctionReportPath = string.Concat(ReportFolder, "\\Functions");
             Directory.CreateDirectory(FunctionReportPath);
 
-
             foreach (var func in Functions)
             {
+                int ElementsNumber = 1;
+                byte ReturnFlag = 0;
                 // 1. create file "function Name.c"
-                List<string> FunctionLines = new List<string>(); 
+                List<string> FunctionLines = new List<string>();
+
                 NewFileName = string.Concat(string.Concat(string.Concat(FunctionReportPath, "\\"), func.Name), ".c");
                 lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
                 foreach (string line in lines)
                 {
-                    if ((!line.Contains(":") && (line.Contains(func.Name))) || (startFunction == true))
+                    if (((line.Contains(func.Name)) && line.Contains(func.ReturnValue)) || (startFunction == true))
                     {
-                        ////add cycle for copying function
+                        string tmp;
+                        string copy;
+
+                        if (line.Contains("//"))
+                            tmp = line.Remove(line.LastIndexOf("//"));
+                        else
+                            tmp = line;
+
                         if (line.Contains("{"))
                             OpenBrace++;
                         if (line.Contains("}"))
                             CloseBrace++;
                         if ((OpenBrace > 0) && (CloseBrace > 0) && (OpenBrace == CloseBrace))
                         {
-                            FunctionLines.Add(line);
+                            if (!string.IsNullOrWhiteSpace(tmp))
+                            {
+                                /// add checking
+                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber);
+                                if (!tmp.Equals(copy))
+                                {
+                                    if ((copy.Contains("/*S*/")) || (copy.Contains("/*E*/")))
+                                    {
+                                        if (copy.Contains("/*E*/"))
+                                        {
+                                            ReturnFlag = 1;
+                                        }
+                                        tmp = copy;
+                                    }
+                                    else
+                                    {
+                                        ElementsNumber++;
+                                        tmp = copy;
+                                    }
+                                }
+                                FunctionLines.Add(tmp);
+                                if (ReturnFlag == 0)
+                                    FunctionLines.Add("/*E*/\r\n");
+                            }
                             startFunction = false;
                             OpenBrace = CloseBrace = 0;
                             break;
                         }
                         else
                         {
-                            FunctionLines.Add(line);
+                            if (!string.IsNullOrWhiteSpace(tmp))
+                            {
+                                /// add checking
+                                ///                             
+                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber);
+                                if (!tmp.Equals(copy))
+                                {
+                                    if ((copy.Contains("/*S*/")) || (copy.Contains("/*E*/")))
+                                    {
+                                        if (copy.Contains("/*E*/"))
+                                        {
+                                            ReturnFlag = 1;
+                                        }
+                                        tmp = copy;
+                                    }
+                                    else
+                                    {
+                                        ElementsNumber++;
+                                        tmp = copy;
+                                    }
+                                }
+                                FunctionLines.Add(tmp);
+                            }
                             startFunction = true;
                         }
                     }
                 }
                 System.IO.File.WriteAllLines(NewFileName, FunctionLines);
+                func.NumberOfElemntsInGraph = ElementsNumber + 1;
+                func.SeparetedFunctionPath = NewFileName;
             }
 
         }
 
+        public string NumerateLineOfFunction(string StringToCheck, string FunctName, string FunctRetType, int LineNum)
+        {
+            string Returned;
+
+            if ((StringToCheck.Contains(FunctName)) && (StringToCheck.Contains(FunctRetType)))
+            {
+                Returned = string.Concat("/*S*/", StringToCheck);
+            }
+            else if ((!StringToCheck.Contains(Constants.C_BREAK)) && (!StringToCheck.Contains(Constants.C_DEFAULT)) &&
+                     (!StringToCheck.Contains(Constants.C_CASE)) && (!StringToCheck.Contains(Constants.C_ELSE)))
+            {
+
+                if ((!StringToCheck.Contains(@"{")) && (!StringToCheck.Contains(@"}")) && (!StringToCheck.Contains(Constants.C_ELSE)))
+                {
+                    if (StringToCheck.Contains(Constants.C_RETURN))
+                    {
+                        Returned = string.Concat("/*E*/", StringToCheck);
+                    }
+                    else
+                    {
+                        Returned = string.Concat("/*" + LineNum + "*/", StringToCheck);
+                    }
+                }
+                else
+                {
+                    Returned = StringToCheck;
+                }
+            }
+            else
+            {
+                Returned = StringToCheck;
+            }
+            return Returned;
+        }
+
+        public int GetNumberOfEdgesFormFunction(string FunctionPath, string FunctionName)
+        {
+            string[] lines;
+            int EdgesNumber = 0;
+
+            lines = System.IO.File.ReadAllLines(FunctionPath);
+            foreach (var line in lines)
+            {
+                if ((line.Contains(FunctionName)) && (line.Contains("/*S*/")))
+                {
+                    EdgesNumber++;
+                }
+                else if ((line.Contains(Constants.C_IF)) && (!line.Contains(Constants.C_ELSE_IF)) && (line.Contains("/*")))
+                {
+                    EdgesNumber = EdgesNumber + 2;
+                }
+                else if ((line.Contains(Constants.C_ELSE_IF)) || (line.Contains(Constants.C_ELSE)))
+                {
+                    EdgesNumber++;
+                }
+                else if (((line.Contains(Constants.C_FOR)) || (line.Contains(Constants.C_WHILE)) && (line.Contains("/*"))))
+                {
+                    EdgesNumber = EdgesNumber + 2;
+                }
+                else if (line.Contains(Constants.C_SWITCH))
+                {
+                    
+                }
+                else if (line.Contains(Constants.C_CASE))
+                {
+                    EdgesNumber++;
+                }
+                else if (line.Contains("/*E*/"))
+                {
+                    
+                }
+                else if (line.Contains("/*"))
+                {
+                    EdgesNumber++;
+                }
+
+            }
+            return EdgesNumber;
+        }
+        public void AddInforInFuctionFiles(string FilePath, int NumOfElem, int NumOfEdges)
+        {
+            string Tmp = "Number of Elements = " + NumOfElem +", " + "Number of Edges = " + NumOfEdges;
+
+            System.IO.File.AppendAllText(FilePath, Tmp);
+
+        }
+        public void AddInformationInsideMatrix(string FilePath)
+        {
+
+        } 
+
+        //public void Write
+
+        public void AddMatrixInFuctionFiles(string FilePath, int NumOfElem, int NumOfEdges)
+        {
+            int[,] matrix = new int[NumOfElem, NumOfEdges];
+
+            System.IO.File.AppendAllText(FilePath, "Matrix\r\n");
+            for (int Elem = 0; Elem < NumOfElem; Elem++)
+            {
+                string Tmp = "{";
+                for ( int Edges = 0; Edges< NumOfEdges;  Edges++)
+                {
+                    Tmp = string.Concat(Tmp, matrix[Elem, Edges]);
+                    if (Edges < NumOfEdges - 1)
+                    {
+                        Tmp = string.Concat(Tmp, ", ");
+                    }
+                    else
+                    {
+                        Tmp = string.Concat(Tmp, "}\r\n");
+                    }
+                }
+                System.IO.File.AppendAllText(FilePath, Tmp);
+            }
+        }
     }
 
     static class ProjectXMLSerializer

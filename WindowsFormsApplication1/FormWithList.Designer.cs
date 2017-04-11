@@ -30,7 +30,7 @@
         {
             this.FunctionListBox = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.BtnDetails = new System.Windows.Forms.Button();
+            this.functionText = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // FunctionListBox
@@ -40,6 +40,7 @@
             this.FunctionListBox.Name = "FunctionListBox";
             this.FunctionListBox.Size = new System.Drawing.Size(260, 290);
             this.FunctionListBox.TabIndex = 1;
+            this.FunctionListBox.SelectedIndexChanged += new System.EventHandler(this.FunctionListBox_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -50,21 +51,22 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Function List";
             // 
-            // BtnDetails
+            // functionText
             // 
-            this.BtnDetails.Location = new System.Drawing.Point(87, 324);
-            this.BtnDetails.Name = "BtnDetails";
-            this.BtnDetails.Size = new System.Drawing.Size(110, 23);
-            this.BtnDetails.TabIndex = 3;
-            this.BtnDetails.Text = "Show Details";
-            this.BtnDetails.UseVisualStyleBackColor = true;
+            this.functionText.Location = new System.Drawing.Point(276, 25);
+            this.functionText.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.functionText.MinimumSize = new System.Drawing.Size(4, 290);
+            this.functionText.Multiline = true;
+            this.functionText.Name = "functionText";
+            this.functionText.Size = new System.Drawing.Size(755, 290);
+            this.functionText.TabIndex = 4;
             // 
             // FormWithList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 359);
-            this.Controls.Add(this.BtnDetails);
+            this.ClientSize = new System.Drawing.Size(1034, 359);
+            this.Controls.Add(this.functionText);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.FunctionListBox);
             this.Name = "FormWithList";
@@ -78,6 +80,6 @@
 
         private System.Windows.Forms.ListBox FunctionListBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button BtnDetails;
+        private System.Windows.Forms.TextBox functionText;
     }
 }

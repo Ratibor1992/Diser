@@ -30,14 +30,21 @@ namespace WindowsFormsApplication1
             ReturnValue = returnValue;
         }
 
+
         public string Name { get; set; }
         public List<FuncParameter> Parameters { get; set; }
         public string ReturnValue { get; set; }
         public bool IsTested { get; set; }
         public string SourcePath { get; set; }
 
+        public string SeparetedFunctionPath { get; set; }
+        public string FunctionCraphPath { get; set; }
 
-        
+        public int NumberOfElemntsInGraph { get; set; }
+
+        public int NumberOfEdgesInGraph { get; set; }
+
+        public int [,] matrix { get; set; }
     }
 
     [Serializable]
