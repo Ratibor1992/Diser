@@ -35,6 +35,8 @@
             // 
             // FunctionListBox
             // 
+            this.FunctionListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.FunctionListBox.FormattingEnabled = true;
             this.FunctionListBox.Location = new System.Drawing.Point(12, 25);
             this.FunctionListBox.Name = "FunctionListBox";
@@ -53,6 +55,9 @@
             // 
             // functionText
             // 
+            this.functionText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.functionText.Location = new System.Drawing.Point(276, 25);
             this.functionText.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.functionText.MinimumSize = new System.Drawing.Size(4, 290);
@@ -65,7 +70,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1034, 359);
+            this.ClientSize = new System.Drawing.Size(1041, 329);
             this.Controls.Add(this.functionText);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.FunctionListBox);

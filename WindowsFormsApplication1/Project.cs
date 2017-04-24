@@ -201,7 +201,7 @@ namespace WindowsFormsApplication1
             byte CloseBrace = 0;
             bool startFunction = false;
             string[] lines;
-
+            
 
 
             FunctionReportPath = string.Concat(ReportFolder, "\\Functions");
@@ -211,6 +211,9 @@ namespace WindowsFormsApplication1
             {
                 int ElementsNumber = 1;
                 byte ReturnFlag = 0;
+                List<int> IfLineNumber = new List<int>();
+                IfLineNumber.Add(0);
+
                 // 1. create file "function Name.c"
                 List<string> FunctionLines = new List<string>();
 
@@ -218,7 +221,7 @@ namespace WindowsFormsApplication1
                 lines = System.IO.File.ReadAllLines(Path + func.SourcePath);
                 foreach (string line in lines)
                 {
-                    if (((line.Contains(func.Name)) && line.Contains(func.ReturnValue)) || (startFunction == true))
+                    if ((line.Contains(func.ReturnValue + " " + func.Name)) || (startFunction == true))
                     {
                         string tmp;
                         string copy;
@@ -227,6 +230,17 @@ namespace WindowsFormsApplication1
                             tmp = line.Remove(line.LastIndexOf("//"));
                         else
                             tmp = line;
+                    
+                        if ((tmp.Contains("/*")) && (tmp.Contains("*/")))
+                        {
+                            int Index1 = 0, Index2 = 0;
+                            Index1 = tmp.IndexOf('/');
+                            Index2 = tmp.IndexOf('*');
+
+                            if (Index1+1 == Index2)
+                                tmp = tmp.Remove(Index1);
+                        }
+                            
 
                         if (line.Contains("{"))
                             OpenBrace++;
@@ -237,15 +251,30 @@ namespace WindowsFormsApplication1
                             if (!string.IsNullOrWhiteSpace(tmp))
                             {
                                 /// add checking
-                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber);
+                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber, IfLineNumber[IfLineNumber.Count()-1]);
                                 if (!tmp.Equals(copy))
                                 {
-                                    if ((copy.Contains("/*S*/")) || (copy.Contains("/*E*/")))
+                                    if ((copy.Contains(Constants.MARK_START)) || (copy.Contains(Constants.MARK_END)))
                                     {
-                                        if (copy.Contains("/*E*/"))
+                                        if (copy.Contains(Constants.MARK_END))
                                         {
                                             ReturnFlag = 1;
                                         }
+                                        tmp = copy;
+                                    }
+                                    else if ((copy.Contains(Constants.C_IF)) && (!copy.Contains(Constants.C_ELSE_IF)))
+                                    {
+                                        IfLineNumber.Add(ElementsNumber);
+                                        tmp = copy;
+                                    }
+                                    else if ((copy.Contains(Constants.C_ELSE)) && (!copy.Contains(Constants.C_ELSE_IF)))
+                                    {
+                                        if (IfLineNumber.Count() > 0)
+                                            IfLineNumber.RemoveAt(IfLineNumber.Count()-1);
+                                        tmp = copy;
+                                    }
+                                    else if (copy.Contains(Constants.C_ELSE_IF))
+                                    {
                                         tmp = copy;
                                     }
                                     else
@@ -256,7 +285,7 @@ namespace WindowsFormsApplication1
                                 }
                                 FunctionLines.Add(tmp);
                                 if (ReturnFlag == 0)
-                                    FunctionLines.Add("/*E*/\r\n");
+                                    FunctionLines.Add(Constants.MARK_END + "\r\n");
                             }
                             startFunction = false;
                             OpenBrace = CloseBrace = 0;
@@ -268,15 +297,31 @@ namespace WindowsFormsApplication1
                             {
                                 /// add checking
                                 ///                             
-                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber);
+                                copy = NumerateLineOfFunction(tmp, func.Name, func.ReturnValue, ElementsNumber, IfLineNumber[IfLineNumber.Count()-1]);
                                 if (!tmp.Equals(copy))
                                 {
-                                    if ((copy.Contains("/*S*/")) || (copy.Contains("/*E*/")))
+                                    if ((copy.Contains(Constants.MARK_START)) || (copy.Contains(Constants.MARK_END)))
                                     {
-                                        if (copy.Contains("/*E*/"))
+                                        if (copy.Contains(Constants.MARK_END))
                                         {
                                             ReturnFlag = 1;
                                         }
+                                        tmp = copy;
+                                    }
+                                    else if ((copy.Contains(Constants.C_IF))&& (!copy.Contains(Constants.C_ELSE_IF)))
+                                    {
+                                        IfLineNumber.Add(ElementsNumber);
+                                        ElementsNumber++;
+                                        tmp = copy;
+                                    }
+                                    else if ((copy.Contains(Constants.C_ELSE)) && (!copy.Contains(Constants.C_ELSE_IF)))
+                                    {
+                                        if (IfLineNumber.Count() > 0)
+                                            IfLineNumber.RemoveAt(IfLineNumber.Count() - 1);
+                                        tmp = copy;
+                                    }
+                                    else if (copy.Contains(Constants.C_ELSE_IF))
+                                    {
                                         tmp = copy;
                                     }
                                     else
@@ -298,33 +343,47 @@ namespace WindowsFormsApplication1
 
         }
 
-        public string NumerateLineOfFunction(string StringToCheck, string FunctName, string FunctRetType, int LineNum)
+        public string NumerateLineOfFunction(string StringToCheck, string FunctName, string FunctRetType, int LineNum, int LastIfNum)
         {
             string Returned;
 
             if ((StringToCheck.Contains(FunctName)) && (StringToCheck.Contains(FunctRetType)))
             {
-                Returned = string.Concat("/*S*/", StringToCheck);
+                Returned = string.Concat(Constants.MARK_START, StringToCheck);
             }
-            else if ((!StringToCheck.Contains(Constants.C_BREAK)) && (!StringToCheck.Contains(Constants.C_DEFAULT)) &&
-                     (!StringToCheck.Contains(Constants.C_CASE)) && (!StringToCheck.Contains(Constants.C_ELSE)))
+            else if ((!StringToCheck.Contains(Constants.C_BREAK))   && 
+                     (!StringToCheck.Contains(Constants.C_DEFAULT)) &&
+                     (!StringToCheck.Contains(Constants.C_CASE)))
             {
-
-                if ((!StringToCheck.Contains(@"{")) && (!StringToCheck.Contains(@"}")) && (!StringToCheck.Contains(Constants.C_ELSE)))
-                {
                     if (StringToCheck.Contains(Constants.C_RETURN))
                     {
-                        Returned = string.Concat("/*E*/", StringToCheck);
+                        Returned = string.Concat(Constants.MARK_END, StringToCheck);
+                    }
+                    else if ((StringToCheck.Contains(Constants.C_FOR))   ||
+                             (StringToCheck.Contains(Constants.C_WHILE)) ||
+                             (StringToCheck.Contains(Constants.C_SWITCH)))
+                    {
+                        Returned = string.Concat("/*" + LineNum + "*/", StringToCheck);
+                    }
+                    else if ((StringToCheck.Contains(Constants.C_IF)) &&
+                            (!StringToCheck.Contains(Constants.C_ELSE)))
+                    {
+                        Returned = string.Concat("/*" + LineNum + "*/", StringToCheck);
+                    }
+                    else if ((StringToCheck.Contains(Constants.C_ELSE)) ||
+                             (StringToCheck.Contains(Constants.C_ELSE_IF)))
+                    {
+                        Returned = string.Concat("/*" + LastIfNum + "*/", StringToCheck);
+                    }
+
+                    else if (!StringToCheck.Contains(";"))
+                    {
+                        Returned = StringToCheck;
                     }
                     else
                     {
                         Returned = string.Concat("/*" + LineNum + "*/", StringToCheck);
                     }
-                }
-                else
-                {
-                    Returned = StringToCheck;
-                }
             }
             else
             {
@@ -339,37 +398,57 @@ namespace WindowsFormsApplication1
             int EdgesNumber = 0;
 
             lines = System.IO.File.ReadAllLines(FunctionPath);
-            foreach (var line in lines)
+            for (int tmp = 0; tmp <lines.Count(); tmp++)
             {
-                if ((line.Contains(FunctionName)) && (line.Contains("/*S*/")))
+                if ((lines[tmp].Contains(FunctionName)) && (lines[tmp].Contains(Constants.MARK_START)))
                 {
                     EdgesNumber++;
                 }
-                else if ((line.Contains(Constants.C_IF)) && (!line.Contains(Constants.C_ELSE_IF)) && (line.Contains("/*")))
+                else if ((lines[tmp].Contains(Constants.C_IF)) && (!lines[tmp].Contains(Constants.C_ELSE_IF)) && (lines[tmp].Contains("/*")))
+                {
+                    byte ElsePres = 0;
+                    int OpenB = 0;
+                    int CloseB = 0;
+                    
+                    /// find else
+                    for (int local = tmp; local < lines.Count(); local++)
+                    {
+                        if (lines[local].Contains("{"))
+                            OpenB++;
+                        if (lines[local].Contains("}"))
+                            CloseB++;
+                        if ((OpenB == CloseB) && (lines[local].Contains(Constants.C_ELSE)) &&
+                               (!lines[local].Contains(Constants.C_ELSE_IF)))
+                        {
+                            ElsePres = 1;
+                        }
+                    }
+                    if (ElsePres == 1)
+                        EdgesNumber++;
+                    else
+                        EdgesNumber = EdgesNumber + 2;
+                }
+                else if ((lines[tmp].Contains(Constants.C_ELSE_IF)) || (lines[tmp].Contains(Constants.C_ELSE)))
+                {
+                    EdgesNumber++;
+                }
+                else if (((lines[tmp].Contains(Constants.C_FOR)) || (lines[tmp].Contains(Constants.C_WHILE)) && (lines[tmp].Contains("/*"))))
                 {
                     EdgesNumber = EdgesNumber + 2;
                 }
-                else if ((line.Contains(Constants.C_ELSE_IF)) || (line.Contains(Constants.C_ELSE)))
-                {
-                    EdgesNumber++;
-                }
-                else if (((line.Contains(Constants.C_FOR)) || (line.Contains(Constants.C_WHILE)) && (line.Contains("/*"))))
-                {
-                    EdgesNumber = EdgesNumber + 2;
-                }
-                else if (line.Contains(Constants.C_SWITCH))
+                else if (lines[tmp].Contains(Constants.C_SWITCH))
                 {
                     
                 }
-                else if (line.Contains(Constants.C_CASE))
+                else if (lines[tmp].Contains(Constants.C_CASE))
                 {
                     EdgesNumber++;
                 }
-                else if (line.Contains("/*E*/"))
+                else if (lines[tmp].Contains(Constants.MARK_END))
                 {
                     
                 }
-                else if (line.Contains("/*"))
+                else if (lines[tmp].Contains("/*"))
                 {
                     EdgesNumber++;
                 }
@@ -377,6 +456,290 @@ namespace WindowsFormsApplication1
             }
             return EdgesNumber;
         }
+
+
+        public void AddInfoInsideMatrix (string FunctionPath, string FunctionName, int[,] matrix, int ElemNum, int EdgesNum)
+        {
+            string[] lines;
+           // int  CycleElemP = 0;
+            int  CurrentElemNumber = 0;
+            int  EdgesPointer = 0;
+            byte elseIsPresent = 0;
+            int OpenB = 0;
+            int CloseB = 0;
+
+            List<int> StartLoopOperator = new List<int>();
+            List<int> AfterLoopOperator = new List<int>();
+
+            List<int> ElemOfBrachOperator = new List<int>();
+            List<int> LastElemOfBrachOperator = new List<int>();
+            List<int> ElemAfterBranchOperator = new List<int>();
+
+                       
+
+            lines = System.IO.File.ReadAllLines(FunctionPath);
+            for (int i =0; i< lines.Count(); i++)
+            {
+                CurrentElemNumber = GetElementNumber(lines[i], ElemNum);
+                if (CurrentElemNumber != -1)
+                {
+                    if (LineIsNameOfFunction(lines[i], FunctionName) == 1)
+                    {
+                        matrix[CurrentElemNumber, EdgesPointer] = 1;
+                    }
+                    else if (LineIsSimpleOperation(lines[i]) == 1)
+                    {
+                        if ((StartLoopOperator.Count > 0) &&
+                            (CurrentElemNumber == (AfterLoopOperator[AfterLoopOperator.Count - 1] - 1)))
+                        {
+                            matrix[CurrentElemNumber, EdgesPointer] = -1;
+                            EdgesPointer++;
+                            matrix[CurrentElemNumber, EdgesPointer] = 1;
+
+                            matrix[StartLoopOperator[StartLoopOperator.Count - 1], EdgesPointer] = -1;
+                            EdgesPointer++;
+                            matrix[StartLoopOperator[StartLoopOperator.Count - 1], EdgesPointer] = 1;
+
+                            if (StartLoopOperator.Count > 0)
+                                StartLoopOperator.RemoveAt(StartLoopOperator.Count - 1);
+
+                            if (AfterLoopOperator.Count > 0)
+                                AfterLoopOperator.RemoveAt(AfterLoopOperator.Count - 1);
+
+                        }
+                        else if ((LastElemOfBrachOperator.Count > 0) &&
+                                (CurrentElemNumber <= LastElemOfBrachOperator[LastElemOfBrachOperator.Count - 1]))
+                        {
+                            if (CurrentElemNumber < LastElemOfBrachOperator[LastElemOfBrachOperator.Count - 1])
+                            {
+                                matrix[CurrentElemNumber, EdgesPointer] = -1;
+                                EdgesPointer++;
+                                matrix[CurrentElemNumber, EdgesPointer] = 1;
+                            }
+                            else if (CurrentElemNumber == LastElemOfBrachOperator[LastElemOfBrachOperator.Count - 1])
+                            {
+                                if (elseIsPresent == 0)
+                                {
+                                    matrix[CurrentElemNumber, EdgesPointer] = -1;
+                                    EdgesPointer++;
+                                    matrix[CurrentElemNumber, EdgesPointer] = -1;
+                                    matrix[ElemOfBrachOperator[ElemOfBrachOperator.Count - 1], EdgesPointer] = 1;
+                                    EdgesPointer++;
+                                    matrix[CurrentElemNumber, EdgesPointer] = 1;
+                                }
+                                else
+                                {
+                                    matrix[CurrentElemNumber, EdgesPointer] = -1;
+                                    EdgesPointer++;
+                                    matrix[CurrentElemNumber, EdgesPointer] = 1;
+                                    matrix[ElemAfterBranchOperator[ElemAfterBranchOperator.Count - 1], EdgesPointer] = -1;
+                                    EdgesPointer++;
+                                    if (CurrentElemNumber == ElemAfterBranchOperator[ElemAfterBranchOperator.Count - 1])
+                                        elseIsPresent--;
+                                }
+                                if (ElemAfterBranchOperator.Count > 0)
+                                    ElemAfterBranchOperator.RemoveAt(ElemAfterBranchOperator.Count - 1);
+                                if (LastElemOfBrachOperator.Count > 0)
+                                    LastElemOfBrachOperator.RemoveAt(LastElemOfBrachOperator.Count - 1);
+                                if (ElemOfBrachOperator.Count > 0)
+                                    ElemOfBrachOperator.RemoveAt(ElemOfBrachOperator.Count - 1);
+                            }
+                        }
+                        else
+                        {
+                            matrix[CurrentElemNumber, EdgesPointer] = -1;
+                            if (EdgesPointer < EdgesNum)
+                                EdgesPointer++;
+                            matrix[CurrentElemNumber, EdgesPointer] = 1;
+
+                        }
+                    }
+                    else if (LineIsCicleOperator(lines[i]) == 1)
+                    {
+                        int OpB = 0, ClB = 0, tmp = 0;
+                        StartLoopOperator.Add(CurrentElemNumber);
+                        //// search out state
+                        if ((!lines[i].Contains("{")) && (!lines[i + 1].Contains("{")))/// issue
+                        {
+                            for (int localS = i + 2; localS < lines.Count(); localS++)
+                            {
+                                tmp = GetElementNumber(lines[localS], ElemNum);
+                                if (tmp != -1)
+                                    AfterLoopOperator.Add(tmp);
+                            }
+                        }
+                        else
+                        {
+                            for (int localS = i; localS < lines.Count(); localS++)
+                            {
+                                tmp = GetElementNumber(lines[localS], ElemNum);
+                                if (lines[localS].Contains("{"))
+                                    OpB++;
+                                if (lines[localS].Contains("}"))
+                                    ClB++;
+
+                                if ((OpB > 0) && (ClB > 0) && (OpB == ClB) && (tmp != -1))
+                                {
+                                    AfterLoopOperator.Add(tmp);
+                                }
+                            }
+                        }
+                        matrix[CurrentElemNumber, EdgesPointer] = -1;
+                        EdgesPointer++;
+                        matrix[CurrentElemNumber, EdgesPointer] = 1;
+                    }
+                    else if (LineIsBranchOperator(lines[i]) == 1)
+                    {
+                        ElemOfBrachOperator.Add(CurrentElemNumber);
+                        if ((lines[i].Contains(Constants.C_IF)) &&
+                            (!lines[i].Contains(Constants.C_ELSE_IF)) &&
+                            (!lines[i].Contains(Constants.C_ELSE)))
+                        {
+                            matrix[CurrentElemNumber, EdgesPointer] = -1; /// set 1,-1 here
+                            EdgesPointer++;
+                            matrix[CurrentElemNumber, EdgesPointer] = 1;
+                            int OpB = 0, ClB = 0;
+                            for (int localS = i; localS < lines.Count(); localS++)
+                            {
+                                if (lines[localS].Contains("{"))
+                                    OpB++;
+                                if (lines[localS].Contains("}"))
+                                    ClB++;
+
+                                if ((OpB == ClB) && (lines[localS].Contains(Constants.C_ELSE)) &&
+                                    (!lines[localS].Contains(Constants.C_ELSE_IF)))
+                                {
+                                    elseIsPresent++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            matrix[ElemOfBrachOperator[ElemOfBrachOperator.Count - 1], EdgesPointer] = 1;
+                            OpenB = CloseB = 0;
+                            //// set 1
+                        }
+                        //// find out element: local out elem and global out elem
+                        for (int local = i; local < lines.Count(); local++)
+                        {
+                            int TMP;
+                            if (lines[local].Contains("{"))
+                                OpenB++;
+                            if (lines[local].Contains("}"))
+                                CloseB++;
+
+                            if (GetElementNumber(lines[local], ElemNum) != -1)
+                            {
+                                if (((lines[local + 1].Contains("}")) && (OpenB == CloseB + 1)) ||
+                                    ((OpenB == 0) && (GetElementNumber(lines[local + 1], ElemNum) != -1)))
+                                {
+                                    if (ElemOfBrachOperator.Count > LastElemOfBrachOperator.Count)
+                                    {
+                                        LastElemOfBrachOperator.Add(GetElementNumber(lines[local], ElemNum));
+                                        for (int littleL = local + 1; littleL < lines.Count(); littleL++)
+                                        {
+                                            TMP = GetElementNumber(lines[littleL], ElemNum);
+                                            if (lines[littleL].Contains("{"))
+                                                OpenB++;
+                                            if (lines[littleL].Contains("}"))
+                                                CloseB++;
+
+                                            if ((TMP != -1) && ((CloseB > OpenB) || (OpenB == CloseB)) && (TMP != ElemOfBrachOperator[ElemOfBrachOperator.Count - 1]))
+                                                ElemAfterBranchOperator.Add(TMP);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (LineIsEndOfFunction(lines[i]) == 1)
+                    {
+                        matrix[ElemNum - 1, EdgesNum - 1] = -1;
+                    }
+                }
+            }
+        }
+
+
+        public int GetElementNumber(string Line, int ElemNum)
+        {
+            string TMP;
+            int NumVal = 0;
+          
+
+            if (Line.Contains(Constants.MARK_START))
+                return 0;
+            if (Line.Contains(Constants.MARK_END))
+                return ElemNum - 1;
+            if (Line.Contains("/*"))
+            {
+                if (Line.Contains("*/"))
+                {
+                    Line = Line.Remove(Line.LastIndexOf("*/"));
+                    TMP = Regex.Replace(Line, "[^0-9]+", string.Empty);
+                    //NumVal = Convert.ToInt32(TMP.Remove(0, 2));
+                    NumVal = Convert.ToInt32(TMP);
+                    if (NumVal > 0)
+                        return NumVal;
+                    else
+                        return -1;
+                }
+                else
+                    return -1;
+
+            }    
+            return -1;
+        }
+
+
+        public byte LineIsNameOfFunction (string Line, string FuncName)
+        {
+            if ((Line.Contains(FuncName)) && (Line.Contains(Constants.MARK_START)))
+                return 1;
+            else
+                return 0;
+        }
+        public byte LineIsSimpleOperation(string Line)
+        {
+            if ((Line.Contains("/*")) && 
+                (!Line.Contains(Constants.C_IF)) &&
+                 (!Line.Contains(Constants.C_ELSE)) &&
+                (!Line.Contains(Constants.C_FOR)) &&
+                (!Line.Contains(Constants.C_SWITCH)) && 
+                (!Line.Contains(Constants.C_WHILE)) && 
+                (!Line.Contains(Constants.MARK_END)))
+                return 1; 
+            else
+                return 0;
+        }
+
+        public byte LineIsCicleOperator(string Line)
+        {
+            if ((Line.Contains("/*")) && ((Line.Contains(Constants.C_WHILE)) || (Line.Contains(Constants.C_FOR))))
+                return 1;
+            else
+                return 0;
+        }
+
+        public byte LineIsBranchOperator (string Line)
+        {
+            if ((Line.Contains(Constants.C_IF)) ||
+                (Line.Contains(Constants.C_ELSE)) ||
+                (Line.Contains(Constants.C_ELSE_IF)))
+                return 1;
+            else
+                return 0;
+        }
+
+        public byte LineIsEndOfFunction(string Line)
+        {
+            if (Line.Contains(Constants.MARK_END))
+                return 1;
+            else
+                return 0;
+        }
+
         public void AddInforInFuctionFiles(string FilePath, int NumOfElem, int NumOfEdges)
         {
             string Tmp = "Number of Elements = " + NumOfElem +", " + "Number of Edges = " + NumOfEdges;
@@ -384,25 +747,21 @@ namespace WindowsFormsApplication1
             System.IO.File.AppendAllText(FilePath, Tmp);
 
         }
-        public void AddInformationInsideMatrix(string FilePath)
-        {
-
-        } 
-
         //public void Write
-
-        public void AddMatrixInFuctionFiles(string FilePath, int NumOfElem, int NumOfEdges)
+        public void AddMatrixInFuctionFiles(string FilePath, int[,] matrix, int ElemNum, int EdgesNum)
         {
-            int[,] matrix = new int[NumOfElem, NumOfEdges];
 
-            System.IO.File.AppendAllText(FilePath, "Matrix\r\n");
-            for (int Elem = 0; Elem < NumOfElem; Elem++)
+            System.IO.File.AppendAllText(FilePath, " Matrix\r\n");
+            for (int Elem = 0; Elem < ElemNum; Elem++)
             {
                 string Tmp = "{";
-                for ( int Edges = 0; Edges< NumOfEdges;  Edges++)
+                for ( int Edges = 0; Edges< EdgesNum;  Edges++)
                 {
-                    Tmp = string.Concat(Tmp, matrix[Elem, Edges]);
-                    if (Edges < NumOfEdges - 1)
+                    if (matrix[Elem, Edges] != -1)
+                        Tmp = string.Concat((Tmp+" "), matrix[Elem, Edges]);
+                    else
+                        Tmp = string.Concat(Tmp, matrix[Elem, Edges]);
+                    if (Edges < EdgesNum - 1)
                     {
                         Tmp = string.Concat(Tmp, ", ");
                     }

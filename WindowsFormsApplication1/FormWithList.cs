@@ -15,15 +15,19 @@ namespace WindowsFormsApplication1
     public partial class FormWithList : Form
     {
         private Project _project;
-        Graphics graph;
+        DrawGraph G;
+        List<Vertex> V;
+        List<Edge> E;
         string[] lines;
 
         public FormWithList(Project project)
         {
             _project = project;
             InitializeComponent();
+
             functionText.Multiline = true;
             functionText.ScrollBars = ScrollBars.Vertical;
+           // GraphPicture.Au
             foreach (var func in _project.Functions)
             {
                 FunctionListBox.Items.Add(func.Name);
@@ -37,7 +41,6 @@ namespace WindowsFormsApplication1
             foreach (var line in lines)
             {
                 functionText.AppendText(line + "\r\n");
-               // functionText.Text = line;
             }
         }
     }

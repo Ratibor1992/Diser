@@ -24,12 +24,14 @@ namespace WindowsFormsApplication1
         public const string C_DEFAULT = "default";
         public const string C_CASE = "case";
         public const string C_ELSE = "else";
-        public const string C_RETURN = "break";
+        public const string C_RETURN = "return";
         public const string C_IF = "if";
         public const string C_ELSE_IF = "else if";
         public const string C_WHILE = "while";
         public const string C_FOR = "for";
         public const string C_SWITCH = "switch";
-
+        // code mark
+        public const string MARK_START = "/*S*/";
+        public const string MARK_END = "/*E*/";
     }
 }

@@ -110,8 +110,11 @@
             this.Controls.Add(this.AnalysisBtn);
             this.Controls.Add(this.ProjectPathTb);
             this.Controls.Add(this.SelectProjFoldBtn);
+            this.MaximizeBox = false;
             this.Name = "MainWindowForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainWindow";
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.ResumeLayout(false);
             this.PerformLayout();
 
