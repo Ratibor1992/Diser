@@ -51,16 +51,18 @@ namespace WindowsFormsApplication1
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
                 projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
-                foreach (var prj in projectObj.Functions)
+                
+                foreach (var func in projectObj.Functions)
                 {
-                    prj.NumberOfEdgesInGraph = projectObj.GetNumberOfEdgesFormFunction(prj.SeparetedFunctionPath, prj.Name);
-                    projectObj.AddInforInFuctionFiles(prj.SeparetedFunctionPath, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
-                    prj.matrix = new int[prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph];
-                    projectObj.AddInfoInsideMatrix(prj.SeparetedFunctionPath, prj.Name, prj.matrix, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
-                    projectObj.AddMatrixInFuctionFiles(prj.SeparetedFunctionPath, prj.matrix, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
+                    func.NumberOfEdgesInGraph = projectObj.GetNumberOfEdgesFormFunction(func.SeparetedFunctionPath, func.Name);
+                    projectObj.AddInforInFuctionFiles(func.SeparetedFunctionPath, func.NumberOfElemntsInGraph, func.NumberOfEdgesInGraph);
+                    func.matrix = new int[func.NumberOfElemntsInGraph, func.NumberOfEdgesInGraph];
+                    projectObj.AddInfoInsideMatrix(func.SeparetedFunctionPath, func.Name, func.matrix, func.NumberOfElemntsInGraph, func.NumberOfEdgesInGraph);
+                    projectObj.AddMatrixInFuctionFiles(func.SeparetedFunctionPath, func.matrix, func.NumberOfElemntsInGraph, func.NumberOfEdgesInGraph);
                     //AddInfoInsideMatrix
                     //projectObj.AddMatrixInFuctionFiles(prj.SeparetedFunctionPath, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
                 }
+                
                 AnalysisResultLbl.Text = Constants.ANALISYS_RESULT_OK;
                 OpenFunctionList.Visible = true;
             }

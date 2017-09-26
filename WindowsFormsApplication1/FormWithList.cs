@@ -42,6 +42,30 @@ namespace WindowsFormsApplication1
             {
                 functionText.AppendText(line + "\r\n");
             }
+            //TODO: We should add automated calculation of vertex  count and edges from matrix
+            V = new List<Vertex>();
+            V.Add(new Vertex(0, 0));
+            V.Add(new Vertex(0, 0));
+            V.Add(new Vertex(0, 0));
+            V.Add(new Vertex(0, 0));
+            V.Add(new Vertex(0, 0));
+            V.Add(new Vertex(0, 0));
+
+
+            E = new List<Edge>();
+            E.Add(new Edge(0, 1));
+            E.Add(new Edge(1, 2));
+            E.Add(new Edge(2, 3));
+            E.Add(new Edge(3, 4));
+            E.Add(new Edge(3, 5));
+            E.Add(new Edge(1, 4));
+            E.Add(new Edge(0, 4));
+
+
+            G = new DrawGraph(graphPictureBox.Width, graphPictureBox.Height);
+            G.VertexesReposition(graphPictureBox.Width, graphPictureBox.Height, V, E);
+            G.drawALLGraph(V, E);
+            graphPictureBox.Image = G.GetBitmap();
         }
     }
 }
