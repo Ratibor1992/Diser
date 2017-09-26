@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 using SharpSvn;
+using WindowsFormsApplication1.ConnectionToKeil;
 
 namespace WindowsFormsApplication1
 {
