@@ -74,7 +74,45 @@ namespace WindowsFormsApplication1
                 }
             }
         }
+        
+        /*Parsing assembly code to get end address shift of function*/
+        private int GetFunctionEndAddressShift(string filePath, string functionName)
+        {
+            int endAddressShift = 0;
+            List<string> functionBody = new List<string>();
+            using (StreamReader sr = new StreamReader(filePath))
+            {
+                string fileLine = "";
+                bool startFinded = false;
+                while ((fileLine = sr.ReadLine()) != null)
+                {
+                    if(fileLine.Contains(functionName + " PROC"))
+                    {
+                        startFinded = true;
+                    }     
+                    /* Storing to local variable only assembly code of function */
+                    if(startFinded && !fileLine.Contains(";;;"))
+                    {
+                        functionBody.Add(fileLine);
+                        if (fileLine.Contains("ENDP"))
+                            break;
+                    }
+                }
+            }
+            /*If function is very small or empty at all*/
+            /* TODO: there is still posibility that function will not have PUSH AND POP words*/
+            if(functionBody.Count >= 3)
+            {
+                string endAddressHex = functionBody[functionBody.Count - 2].Substring(0, functionBody[functionBody.Count - 2].IndexOf(' '));
+                endAddressShift = int.Parse(endAddressHex, System.Globalization.NumberStyles.HexNumber);
+            }
+            else
+            {
+                endAddressShift = 0;
+            }
 
+            return endAddressShift;
+        }
         private void GetFunctionList()
         {
             string MapFilePath;
@@ -100,14 +138,29 @@ namespace WindowsFormsApplication1
 
                         if (Regex.IsMatch(line, temp, RegexOptions.IgnoreCase))
                         {
+                            /* Should be addded check for exceptions. For example if file is not found , etc.*/
+
                             string FunctionFilePath = Directory.GetFiles(Path, filesname, SearchOption.AllDirectories).First();
+                            /* File genereted by compiler with assebly code + comments */
+                            string functionAssemblyFileName = filesname.Remove(filesname.Length - 2).ToLower() + ".txt";
+                            string functionAssemblyFilePath = Directory.GetFiles(Path, functionAssemblyFileName, SearchOption.AllDirectories).First(); ;
 
                             using (StreamReader sr = new StreamReader(FunctionFilePath))
                             {
-                                string firstWord = line.Trim();
-                                firstWord.Substring(0, firstWord.IndexOf(" "));
-                                string functionName = firstWord.Substring(0, firstWord.IndexOf(" "));
-
+                                string funtionMapLine = line.Trim();
+                                funtionMapLine.Substring(0, funtionMapLine.IndexOf(" "));
+                                string functionName = funtionMapLine.Substring(0, funtionMapLine.IndexOf(" "));
+                                /*
+                                  Replace all multiple space with a single space
+                                */
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex("[ ]{2,}", options);
+                                funtionMapLine = regex.Replace(funtionMapLine, " ");
+                                /* Potential dangerous place, because we cut the string till "x" symbol*/
+                                funtionMapLine = funtionMapLine.Substring(funtionMapLine.IndexOf("0x") + 2);
+                                string startAddressHex = funtionMapLine.Substring(0, funtionMapLine.IndexOf(" "));
+                                int startAddress = int.Parse(startAddressHex, System.Globalization.NumberStyles.HexNumber);
+                                int endAddress = GetFunctionEndAddressShift(functionAssemblyFilePath, functionName) + startAddress;
                                 string fileContents = sr.ReadToEnd();
 
                                 Regex rx = new Regex(String.Format("[a-zA-Z0-9]+ {0}\\s*[(]", functionName));
@@ -145,7 +198,7 @@ namespace WindowsFormsApplication1
                                         funcParameters.Add(new FuncParameter() { Name = parametersTokens[parametersTokens.Length - 1], Type = parameterType });
                                     }
                                 }
-                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, ""), funcParameters, functionReturnType));
+                                Functions.Add(new Function(functionName, FunctionFilePath.Replace(Path, ""), funcParameters, functionReturnType, startAddress, endAddress));
                             }
                         }
                     }

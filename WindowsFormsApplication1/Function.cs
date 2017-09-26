@@ -21,13 +21,15 @@ namespace WindowsFormsApplication1
             Parameters = new List<FuncParameter>();
         }
 
-        public Function(string name, string sourcePath, List<FuncParameter> funcParameters, string returnValue)
+        public Function(string name, string sourcePath, List<FuncParameter> funcParameters, string returnValue, int startAddress, int endAddress)
         {
             Name = name;
             SourcePath = sourcePath;
             Parameters = funcParameters;
             IsTested = false;
             ReturnValue = returnValue;
+            StartAddress = startAddress;
+            EndAddress = endAddress;
         }
 
 
@@ -43,6 +45,9 @@ namespace WindowsFormsApplication1
         public int NumberOfElemntsInGraph { get; set; }
 
         public int NumberOfEdgesInGraph { get; set; }
+
+        public int StartAddress { get; set; }
+        public int EndAddress { get; set; }
 
         public int [,] matrix { get; set; }
     }
