@@ -52,7 +52,7 @@ namespace WindowsFormsApplication1
                 projectObj.ParseProject();
                 projectObj.GenerateReport(ReportPath);
                 projectObj.CopyFunctionsToSeparetedFiles(ReportFolderPath);
-                
+           /*     
                 foreach (var func in projectObj.Functions)
                 {
                     func.NumberOfEdgesInGraph = projectObj.GetNumberOfEdgesFormFunction(func.SeparetedFunctionPath, func.Name);
@@ -63,7 +63,7 @@ namespace WindowsFormsApplication1
                     //AddInfoInsideMatrix
                     //projectObj.AddMatrixInFuctionFiles(prj.SeparetedFunctionPath, prj.NumberOfElemntsInGraph, prj.NumberOfEdgesInGraph);
                 }
-                
+           */
                 AnalysisResultLbl.Text = Constants.ANALISYS_RESULT_OK;
                 OpenFunctionList.Visible = true;
             }

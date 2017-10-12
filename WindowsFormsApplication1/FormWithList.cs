@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApplication1;
+using WindowsFormsApplication1.ConnectionToKeil;
 
 
 namespace WindowsFormsApplication1
@@ -66,6 +67,18 @@ namespace WindowsFormsApplication1
             G.VertexesReposition(graphPictureBox.Width, graphPictureBox.Height, V, E);
             G.drawALLGraph(V, E);
             graphPictureBox.Image = G.GetBitmap();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if(FunctionListBox.SelectedIndex != -1)
+            {
+                TimeSpan functionTimeResult = ConnectionToKeilClass.GetFunctionRunTime(_project.Functions[FunctionListBox.SelectedIndex].StartAddress, _project.Functions[FunctionListBox.SelectedIndex].EndAddress);
+                string oldText = functionText.Text;
+                functionText.Text = "Total milliseconds: " + functionTimeResult.TotalMilliseconds.ToString() + System.Environment.NewLine;
+                functionText.Text += "Total seconds: " + functionTimeResult.TotalSeconds.ToString() + System.Environment.NewLine;
+                functionText.Text += oldText;
+            }
         }
     }
 }

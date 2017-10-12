@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -8,9 +9,10 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApplication1.ConnectionToKeil
 {
-    class ConnectionToKeil
+    static class ConnectionToKeilClass
     {
         public static bool runningFlag = true;
+        public static Stopwatch stopWatch = new Stopwatch();
         [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe public static extern UVSC_STATUS UVSC_OpenConnection([MarshalAs(UnmanagedType.LPStr)] string name,
                                                     short* iConnHandle,
@@ -25,10 +27,15 @@ namespace WindowsFormsApplication1.ConnectionToKeil
 
 
         [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
+        unsafe public static extern UVSC_STATUS UVSC_CloseConnection(int iConnHandle,
+        bool terminate);
+
+        [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern UVSC_STATUS UVSC_Init(short uvMinPort,
                                       short uvMaxPort);
 
-
+        [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern UVSC_STATUS UVSC_UnInit(); 
 
         [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern UVSC_STATUS UVSC_DBG_ENTER(short iConnHandle);
@@ -47,16 +54,106 @@ namespace WindowsFormsApplication1.ConnectionToKeil
         [DllImport("UVSC64.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe public static extern UVSC_STATUS UVSC_DBG_START_EXECUTION(int iConnHandle);
 
+        [MarshalAs(UnmanagedType.LPStr)]
+        static string uvCmd = "";
+
         //Callback for 
-        public void keilCallback(IntPtr cb_custom, UVSC_CB_TYPE type, ref UVSC_CB_DATA data)
+        private static void keilCallback(IntPtr cb_custom, UVSC_CB_TYPE type, ref UVSC_CB_DATA data)
         {
             if ((data.msg.data.cmdRsp.cmd == UV_OPERATION.UV_DBG_STOP_EXECUTION) && (data.msg.data.cmdRsp.StopR.nBpNum != -1))
             {
-                Console.WriteLine(data.msg.data.cmdRsp.StopR.eReason);
-                Console.WriteLine(data.msg.data.cmdRsp.StopR.nBpNum);
-                runningFlag = false;
+                if(data.msg.data.cmdRsp.StopR.nBpNum == 0)
+                {
+                    stopWatch.Start();
+                }
+                else if (data.msg.data.cmdRsp.StopR.nBpNum == 1)
+                {
+                    stopWatch.Stop();
+                    runningFlag = false;
+                }
             }
             return; 
+        }
+
+        public static TimeSpan GetFunctionRunTime(int StartAddress, int EndAddress)
+        {
+            const int MAX_OP_TRIES = 3;
+            int trynumber = 1;
+
+            short connectionHndl = 0, port = 0;
+            uvsc_cb newCallback = new uvsc_cb(keilCallback);
+            UVSC_STATUS operationStatus = UVSC_STATUS.UVSC_STATUS_FAILED;
+            UVSC_RUNMODE uvRunmode = UVSC_RUNMODE.UVSC_RUNMODE_NORMAL;
+            String startAddress = (StartAddress + 1).ToString();
+            String endAddress = (EndAddress - 1).ToString();
+            BKRSP[] bkrsp = new BKRSP[128];
+
+            BKPARM bk1params = new BKPARM();
+            bk1params.type = BKTYPE.BRKTYPE_EXEC;
+            bk1params.count = 1;
+            bk1params.accSize = 0;
+            bk1params.nCmdLen = 1;
+            bk1params.szBuffer = startAddress;
+            bk1params.nExpLen = (uint)startAddress.Length + 1;
+
+            BKPARM bk2params = new BKPARM();
+            bk2params.type = BKTYPE.BRKTYPE_EXEC;
+            bk2params.count = 1;
+            bk2params.accSize = 0;
+            bk2params.nCmdLen = 1;
+            bk2params.szBuffer = endAddress;
+            bk2params.nExpLen = (uint)endAddress.Length + 1;
+
+
+            stopWatch.Reset();
+            unsafe
+            {
+                // Should to do something more flexible
+                UVSC_Init(4823, 4832);
+
+                while (operationStatus != UVSC_STATUS.UVSC_STATUS_SUCCESS && trynumber != MAX_OP_TRIES)
+                {
+                    operationStatus = UVSC_OpenConnection(null, &connectionHndl, &port, uvCmd, uvRunmode, newCallback, null, null, false, null);
+                    trynumber++;
+                }
+               
+                operationStatus = UVSC_DBG_ENTER(connectionHndl);
+                if(operationStatus != UVSC_STATUS.UVSC_STATUS_SUCCESS)
+                {
+                    return new TimeSpan(0);
+                }
+
+                int bkRspSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(BKRSP));
+                int bkParamsSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(BKPARM));
+
+                operationStatus = UVSC_DBG_CREATE_BP(connectionHndl, bk1params, bkParamsSize, bkrsp, ref bkRspSize);
+                if (operationStatus != UVSC_STATUS.UVSC_STATUS_SUCCESS)
+                {
+                    return new TimeSpan(0);
+                }
+
+                operationStatus = UVSC_DBG_CREATE_BP(connectionHndl, bk2params, bkParamsSize, bkrsp, ref bkRspSize);
+                if (operationStatus != UVSC_STATUS.UVSC_STATUS_SUCCESS)
+                {
+                    return new TimeSpan(0);
+                }
+
+                operationStatus = UVSC_DBG_START_EXECUTION(connectionHndl);
+                if (operationStatus != UVSC_STATUS.UVSC_STATUS_SUCCESS)
+                {
+                    return new TimeSpan(0);
+                }
+
+                while (runningFlag)
+                {
+                    Thread.Sleep(1);
+                }
+
+                UVSC_CloseConnection(connectionHndl, false);
+                UVSC_UnInit();
+            }
+
+            return stopWatch.Elapsed;
         }
 
         // approximate algorithm of work with this lib 

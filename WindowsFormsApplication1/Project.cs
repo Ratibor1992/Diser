@@ -38,12 +38,12 @@ namespace WindowsFormsApplication1
         {
             GetUserFiles();
             GetFunctionList();
-            GetSVNRevision();
+       //     GetSVNRevision();
         }
         private void GetUserFiles()
         {
             List<string> folders = new List<string>(Directory.EnumerateDirectories(Path));
-
+            folders.Add(Path);
             foreach (string line in folders)
             {
                 if ((line.Contains(Constants.SVN)) ||
@@ -103,15 +103,27 @@ namespace WindowsFormsApplication1
             /* TODO: there is still posibility that function will not have PUSH AND POP words*/
             if(functionBody.Count >= 3)
             {
-                string endAddressHex = functionBody[functionBody.Count - 2].Substring(0, functionBody[functionBody.Count - 2].IndexOf(' '));
-                endAddressShift = int.Parse(endAddressHex, System.Globalization.NumberStyles.HexNumber);
+                string endAddressHex = "";
+                foreach (string line in functionBody)
+                {
+                    if (line.Contains("POP"))
+                    {
+                        endAddressHex = line.Substring(0, line.IndexOf(' '));
+                        return int.Parse(endAddressHex, System.Globalization.NumberStyles.HexNumber);
+                    }
+                }
+                if (endAddressHex == "")
+                {
+                    endAddressHex = functionBody[functionBody.Count - 2].Substring(0, functionBody[functionBody.Count - 2].IndexOf(' '));
+                    return int.Parse(endAddressHex, System.Globalization.NumberStyles.HexNumber);
+                }
             }
             else
             {
-                endAddressShift = 0;
+                return 0;
             }
 
-            return endAddressShift;
+            return 0;
         }
         private void GetFunctionList()
         {

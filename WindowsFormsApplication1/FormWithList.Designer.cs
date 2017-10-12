@@ -32,6 +32,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.functionText = new System.Windows.Forms.TextBox();
             this.graphPictureBox = new System.Windows.Forms.PictureBox();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.graphPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -59,12 +60,12 @@
             // 
             this.functionText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.functionText.Location = new System.Drawing.Point(276, 25);
+            this.functionText.Location = new System.Drawing.Point(332, 25);
             this.functionText.Margin = new System.Windows.Forms.Padding(2);
             this.functionText.MinimumSize = new System.Drawing.Size(4, 290);
             this.functionText.Multiline = true;
             this.functionText.Name = "functionText";
-            this.functionText.Size = new System.Drawing.Size(753, 290);
+            this.functionText.Size = new System.Drawing.Size(697, 290);
             this.functionText.TabIndex = 4;
             // 
             // graphPictureBox
@@ -79,11 +80,22 @@
             this.graphPictureBox.TabIndex = 5;
             this.graphPictureBox.TabStop = false;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(279, 130);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(48, 88);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "TEST IT";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // FormWithList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1039, 690);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.graphPictureBox);
             this.Controls.Add(this.functionText);
             this.Controls.Add(this.label1);
@@ -102,5 +114,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox functionText;
         private System.Windows.Forms.PictureBox graphPictureBox;
+        private System.Windows.Forms.Button button1;
     }
 }
